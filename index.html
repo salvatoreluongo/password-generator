@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="it-IT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>try{var t=localStorage.getItem('tema');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+  <title>Password Generator | Salvatore Luongo</title>
+  <meta name="description" content="Genera password casuali, forti e sicure direttamente nel tuo browser: nessun dato lascia il tuo dispositivo. Scegli lunghezza e caratteri e copia con un clic.">
+  <meta name="author" content="Salvatore Luongo">
+  <link rel="canonical" href="https://salvatoreluongo.github.io/password-generator/">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="it_IT">
+  <meta property="og:site_name" content="Salvatore Luongo">
+  <meta property="og:title" content="Password Generator">
+  <meta property="og:description" content="Password casuali, forti e sicure, generate nel tuo browser. Nessun dato lascia il tuo dispositivo.">
+  <meta property="og:url" content="https://salvatoreluongo.github.io/password-generator/">
+  <meta name="twitter:card" content="summary">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" href="avatar.png">
+  <style>
+    /* Colori e tipografia */
+    :root {
+      --bg:#ffffff; --ink:#111111; --body:#262626; --muted:#7a7a7a; --line:#ececec;
+      --pill:#f4f4f4; --pill-hover:#eaeaea; --accent:#e8693f; --header-bg:rgba(255,255,255,.82);
+      --source-bg:#fff6f2; --card-bg:#ffffff; --accent-soft:#fdeee7;
+      --shadow-card:0 10px 32px rgba(30,34,42,.05);
+      --ok:#2e7d32;
+      --font:"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --mono:ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg:#0f1115; --ink:#f4f5f7; --body:#c9ccd3; --muted:#8b909b; --line:#262a31;
+        --pill:#1b1f26; --pill-hover:#242933; --accent:#ff7d54; --header-bg:rgba(15,17,21,.82);
+        --source-bg:#241711; --card-bg:#171d26; --accent-soft:#2b1d17;
+        --shadow-card:0 10px 34px rgba(0,0,0,.22); --ok:#4caf50;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg:#0f1115; --ink:#f4f5f7; --body:#c9ccd3; --muted:#8b909b; --line:#262a31;
+      --pill:#1b1f26; --pill-hover:#242933; --accent:#ff7d54; --header-bg:rgba(15,17,21,.82);
+      --source-bg:#241711; --card-bg:#171d26; --accent-soft:#2b1d17;
+      --shadow-card:0 10px 34px rgba(0,0,0,.22); --ok:#4caf50;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin:0; background:var(--bg); color:var(--body); font-family:var(--font); -webkit-font-smoothing:antialiased; transition:background .3s ease, color .3s ease; }
+    a { color: inherit; }
+    button { font-family: inherit; }
+    .container { max-width:1240px; margin:0 auto; padding:0 20px; }
+    .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+    /* ── Header ── */
+    .site-header { position:sticky; top:0; z-index:200; background:var(--header-bg); backdrop-filter:saturate(160%) blur(14px); -webkit-backdrop-filter:saturate(160%) blur(14px); }
+    .header-inner { display:flex; align-items:center; gap:14px; height:84px; }
+    .avatar { width:56px; height:56px; border-radius:50%; background:#111; object-fit:cover; display:block; }
+    .brand { font-weight:700; font-size:18px; color:var(--ink); flex:1; opacity:0; transition:opacity .2s; text-decoration:none; }
+    @media (min-width:700px) { .brand { opacity:1; } }
+    .theme-toggle { margin-left:auto; width:44px; height:44px; border:0; background:var(--pill); border-radius:50%; color:var(--ink); display:grid; place-items:center; cursor:pointer; padding:0; transition:background .2s, transform .15s; }
+    .theme-toggle:hover { transform:translateY(-1px); background:var(--pill-hover); }
+    .sun-moon { display:block; }
+    .sun-moon .mask-dot { transition:transform .5s cubic-bezier(.4,0,.2,1); }
+    .sun-moon .sm-rays line { transform-origin:12px 12px; transition:transform .45s cubic-bezier(.4,0,.2,1), opacity .3s ease; }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .sun-moon .mask-dot { transform:translate(-8px,4px); }
+      :root:not([data-theme="light"]) .sun-moon .sm-rays line { transform:scale(0); opacity:0; }
+    }
+    :root[data-theme="dark"] .sun-moon .mask-dot { transform:translate(-8px,4px); }
+    :root[data-theme="dark"] .sun-moon .sm-rays line { transform:scale(0); opacity:0; }
+
+    /* ── Hero con terminale ── */
+    .hero { margin:36px 0 28px; padding:50px; display:grid; grid-template-columns:.9fr 1.1fr; gap:44px; align-items:center; border-radius:26px; position:relative; overflow:hidden; color:#f9fafb;
+      background:radial-gradient(ellipse at 88% 6%, rgba(255,122,79,.22), transparent 38%), linear-gradient(145deg,#1e2733 0%,#101722 82%); }
+    .hero::after { content:""; position:absolute; width:520px; height:520px; border:1px solid rgba(255,255,255,.05); border-radius:50%; right:-240px; top:-220px; pointer-events:none; }
+    .hero-copy, .terminal { position:relative; z-index:1; min-width:0; }
+    .eyebrow { display:inline-flex; align-items:center; gap:10px; font-size:11px; font-weight:800; letter-spacing:.16em; color:#f9ac85; }
+    .live-dot { width:7px; height:7px; background:#ff7a4f; border-radius:50%; box-shadow:0 0 0 5px rgba(255,122,79,.14); }
+    .hero h1 { color:#fff; font-size:clamp(30px,3.4vw,50px); margin:20px 0 16px; line-height:1.12; letter-spacing:-.045em; font-weight:800; }
+    .hero p { margin:0; font-size:16.5px; line-height:1.7; color:#bdc8d5; max-width:480px; }
+    .hero-badges { display:flex; flex-wrap:wrap; gap:8px; margin-top:24px; }
+    .hero-badges span { display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:700; color:#dfe6ee; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); border-radius:999px; padding:7px 13px; }
+    .hero-badges svg { width:14px; height:14px; color:#7ae2b3; }
+
+    .terminal { border:1px solid rgba(222,230,240,.18); border-radius:16px; background:rgba(9,14,21,.55); box-shadow:0 24px 50px rgba(0,0,0,.26); overflow:hidden; }
+    .terminal-bar { height:42px; padding:0 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,.1); color:#8193a5; font:700 9px var(--mono); letter-spacing:.1em; }
+    .terminal-dots { display:inline-flex; gap:5px; }
+    .terminal-dots i { width:7px; height:7px; background:#ff936b; border-radius:50%; }
+    .terminal-dots i:nth-child(2) { background:#f4c56e; } .terminal-dots i:nth-child(3) { background:#69c8aa; }
+    .terminal-square { margin-left:auto; color:#657587; }
+    .terminal-content { padding:20px 22px 22px; }
+    .t-line { font:500 12.5px/1.9 var(--mono); color:#c8d4df; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .t-user { color:#7ae2b3; } .t-punct { color:#657587; } .t-path { color:#6fb1d8; } .t-cmd { color:#e6c074; } .t-flag { color:#8193a5; }
+
+    .pw-out { display:block; margin:12px 0 0; min-height:2.7em; font:700 clamp(19px,2.3vw,28px)/1.35 var(--mono); letter-spacing:.02em; color:#f9fafb; word-break:break-all; overflow-wrap:anywhere; user-select:all; -webkit-user-select:all; }
+    .pw-out .ch-u { color:#f9fafb; } .pw-out .ch-l { color:#b7c4d1; } .pw-out .ch-d { color:#35d6e8; } .pw-out .ch-s { color:#ff5fa2; }
+    .pw-out.masked { letter-spacing:.12em; color:#8193a5; user-select:none; -webkit-user-select:none; }
+    .legend { display:flex; flex-wrap:wrap; gap:14px; margin:12px 0 0; font:600 11px var(--mono); color:#8193a5; }
+    .legend i { display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:6px; vertical-align:0; }
+
+    .t-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; padding-top:18px; border-top:1px solid rgba(255,255,255,.08); }
+    .btn-primary { background:#ff7a4f; color:#17202b; border:0; border-radius:12px; padding:13px 20px; font-weight:800; font-size:14px; display:inline-flex; align-items:center; gap:10px; cursor:pointer; transition:transform .18s, background .18s; }
+    .btn-primary:hover { transform:translateY(-2px); background:#ff946f; }
+    .btn-primary.ok { background:#69c8aa; }
+    .btn-ghost { background:rgba(255,255,255,.08); color:#f4f6f9; border:1px solid rgba(255,255,255,.14); border-radius:12px; padding:12px 16px; font-weight:700; font-size:14px; display:inline-flex; align-items:center; gap:9px; cursor:pointer; transition:background .18s, transform .18s; }
+    .btn-ghost:hover { background:rgba(255,255,255,.15); transform:translateY(-2px); }
+    .btn-ghost.icon { padding:12px; margin-left:auto; }
+    .t-actions svg { width:17px; height:17px; flex:0 0 auto; }
+    .spin svg { animation:spin .45s ease; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* ── Pannelli ── */
+    .panels { display:grid; grid-template-columns:1.25fr .75fr; gap:22px; }
+    .card { background:var(--card-bg); border:1px solid var(--line); border-radius:20px; box-shadow:var(--shadow-card); padding:28px 30px; min-width:0; }
+    .section-kicker { display:inline-block; font-size:10px; font-weight:800; letter-spacing:.14em; color:var(--accent); }
+    .card h2 { font-size:clamp(21px,2vw,26px); color:var(--ink); font-weight:800; letter-spacing:-.035em; margin:7px 0 0; line-height:1.2; }
+
+    .field { margin-top:26px; }
+    .field-head { display:flex; align-items:baseline; justify-content:space-between; gap:12px; }
+    .field-label { font-weight:700; font-size:15px; color:var(--ink); }
+    .field-hint { font-size:13px; color:var(--muted); }
+
+    .len-row { display:flex; align-items:center; gap:14px; margin-top:14px; }
+    .len-num { font:800 32px/1 var(--font); color:var(--ink); letter-spacing:-.04em; min-width:2.2ch; text-align:center; font-variant-numeric:tabular-nums; }
+    .step { width:42px; height:42px; flex:0 0 auto; border:0; border-radius:50%; background:var(--pill); color:var(--ink); font:700 22px/1 var(--font); cursor:pointer; display:grid; place-items:center; transition:background .15s, transform .15s; }
+    .step:hover { background:var(--accent); color:#fff; }
+    .step:active { transform:scale(.94); }
+    input[type=range] { -webkit-appearance:none; appearance:none; flex:1; min-width:0; height:8px; border-radius:999px; cursor:pointer;
+      background:linear-gradient(to right, var(--accent) 0 var(--p,20%), var(--pill) var(--p,20%) 100%); }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:24px; height:24px; border-radius:50%; background:#fff; border:3px solid var(--accent); box-shadow:0 2px 8px rgba(0,0,0,.18); transition:transform .15s; }
+    input[type=range]::-webkit-slider-thumb:hover { transform:scale(1.12); }
+    input[type=range]::-moz-range-thumb { width:18px; height:18px; border-radius:50%; background:#fff; border:3px solid var(--accent); box-shadow:0 2px 8px rgba(0,0,0,.18); }
+    input[type=range]:focus-visible { outline:2px solid var(--accent); outline-offset:6px; }
+
+    .chips { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px; margin-top:14px; }
+    .chip { position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:6px; text-align:left; border:1.5px solid var(--line); background:var(--bg); border-radius:14px; padding:14px 14px 13px; cursor:pointer; color:var(--muted); transition:border-color .15s, background .15s, color .15s, transform .15s; }
+    .chip:hover { transform:translateY(-2px); border-color:color-mix(in srgb, var(--accent) 45%, var(--line)); }
+    .chip strong { color:var(--ink); font-size:14.5px; font-weight:700; }
+    .chip code { font:700 13px var(--mono); }
+    .chip .tick { position:absolute; top:11px; right:11px; width:20px; height:20px; border-radius:50%; border:1.5px solid var(--line); display:grid; place-items:center; transition:background .15s, border-color .15s; }
+    .chip .tick svg { width:12px; height:12px; color:#fff; opacity:0; transition:opacity .15s; }
+    .chip[aria-pressed="true"] { border-color:var(--accent); background:var(--accent-soft); color:var(--accent); }
+    .chip[aria-pressed="true"] .tick { background:var(--accent); border-color:var(--accent); }
+    .chip[aria-pressed="true"] .tick svg { opacity:1; }
+
+    .switch-row { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 0; border-top:1px solid var(--line); cursor:pointer; }
+    .switch-row:first-of-type { margin-top:14px; }
+    .switch-row span { display:flex; flex-direction:column; gap:3px; }
+    .switch-row strong { font-size:15px; color:var(--ink); font-weight:700; }
+    .switch-row small { font-size:13px; color:var(--muted); line-height:1.45; }
+    .switch-row small code { font:600 12.5px var(--mono); background:var(--pill); padding:1px 5px; border-radius:5px; color:var(--ink); }
+    .switch { position:relative; flex:0 0 auto; width:46px; height:27px; }
+    .switch input { position:absolute; opacity:0; width:100%; height:100%; margin:0; cursor:pointer; }
+    .switch i { position:absolute; inset:0; border-radius:999px; background:var(--pill-hover); transition:background .2s; pointer-events:none; }
+    .switch i::after { content:""; position:absolute; top:3px; left:3px; width:21px; height:21px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.25); transition:transform .2s; }
+    .switch input:checked + i { background:var(--accent); }
+    .switch input:checked + i::after { transform:translateX(19px); }
+    .switch input:focus-visible + i { outline:2px solid var(--accent); outline-offset:3px; }
+
+    /* Robustezza */
+    .strength-word { font-size:clamp(28px,3vw,38px); font-weight:800; letter-spacing:-.04em; margin:18px 0 0; color:var(--s-color, var(--ink)); transition:color .25s; }
+    .meter { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-top:14px; }
+    .meter i { height:8px; border-radius:999px; background:var(--pill); transition:background .25s; }
+    .meter i.on { background:var(--s-color); }
+    .stats { list-style:none; margin:22px 0 0; padding:0; }
+    .stats li { display:flex; justify-content:space-between; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); font-size:14.5px; }
+    .stats li:last-child { border-bottom:0; }
+    .stats span { color:var(--muted); }
+    .stats strong { color:var(--ink); font-weight:700; text-align:right; }
+    .note { font-size:12.5px; line-height:1.55; color:var(--muted); margin:10px 0 0; }
+
+    /* Come funziona */
+
+
+    .site-footer { color:var(--muted); font-size:14px; padding-top:40px; padding-bottom:50px; border-top:1px solid var(--line); margin-top:40px; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+    .site-footer a { color:var(--muted); }
+
+    .toast { position:fixed; left:50%; bottom:28px; transform:translate(-50%,18px); background:#1f2633; color:#fff; padding:11px 20px; border-radius:999px; font:600 14px var(--font); opacity:0; transition:opacity .25s, transform .25s; z-index:500; box-shadow:0 8px 24px rgba(0,0,0,.35); pointer-events:none; }
+    .toast.show { opacity:1; transform:translate(-50%,0); }
+
+    @media (max-width:980px) {
+      .hero { grid-template-columns:1fr; padding:40px; gap:30px; }
+      .panels { grid-template-columns:1fr; }
+    }
+    @media (max-width:600px) {
+      .hero { margin:16px 0 22px; padding:26px 18px 18px; border-radius:20px; }
+      .hero p { font-size:15.5px; }
+      .terminal-content { padding:16px 16px 18px; }
+      .card { padding:22px 20px; }
+      .chips { grid-template-columns:repeat(2, minmax(0,1fr)); }
+      .t-actions .btn-primary, .t-actions .btn-ghost:not(.icon) { flex:1; justify-content:center; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition:none !important; animation:none !important; } }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner container">
+      <a href="/password-generator/" aria-label="Password Generator">
+        <img class="avatar" src="avatar.png" alt="Salvatore Luongo" width="56" height="56">
+      </a>
+      <a class="brand" href="/password-generator/">Salvatore Luongo</a>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Cambia tema chiaro/scuro" title="Tema chiaro/scuro">
+        <svg class="sun-moon" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+          <mask id="moon-mask"><rect x="0" y="0" width="24" height="24" fill="white"/><circle class="mask-dot" cx="24" cy="4" r="6" fill="black"/></mask>
+          <circle cx="12" cy="12" r="6" fill="currentColor" mask="url(#moon-mask)"/>
+          <g class="sm-rays" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="12" y1="1.6" x2="12" y2="3.4"/><line x1="12" y1="20.6" x2="12" y2="22.4"/>
+            <line x1="1.6" y1="12" x2="3.4" y2="12"/><line x1="20.6" y1="12" x2="22.4" y2="12"/>
+            <line x1="4.4" y1="4.4" x2="5.7" y2="5.7"/><line x1="18.3" y1="18.3" x2="19.6" y2="19.6"/>
+            <line x1="4.4" y1="19.6" x2="5.7" y2="18.3"/><line x1="18.3" y1="5.7" x2="19.6" y2="4.4"/>
+          </g>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+
+  <main class="container">
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="live-dot"></span> SICURO IN UN CLIC</span>
+        <h1>Password Generator</h1>
+        <p>Crea password forti e casuali per proteggere i tuoi account. Vengono generate nel tuo browser: non passano da nessun server e non vengono salvate da nessuna parte.</p>
+        <div class="hero-badges">
+          <span><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7.5"/></svg>Casualità crittografica</span>
+          <span><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7.5"/></svg>Nulla viene salvato</span>
+        </div>
+      </div>
+
+      <div class="terminal">
+        <div class="terminal-bar">
+          <span class="terminal-dots"><i></i><i></i><i></i></span>
+          <span>TERMINAL</span>
+          <span class="terminal-square">⌘</span>
+        </div>
+        <div class="terminal-content">
+          <p class="t-line" aria-hidden="true"><span class="t-user">root@salvatoreluongo</span><span class="t-punct">:</span><span class="t-path">~</span><span class="t-punct">$</span> <span class="t-cmd">./genera.sh</span> <span class="t-flag" id="t-flags">--lunghezza 16</span></p>
+          <output class="pw-out" id="pw" aria-live="polite" aria-label="Password generata"></output>
+          <div class="legend" aria-hidden="true">
+            <span><i style="background:#f9fafb"></i>ABC</span>
+            <span><i style="background:#b7c4d1"></i>abc</span>
+            <span><i style="background:#35d6e8"></i>123</span>
+            <span><i style="background:#ff5fa2"></i>#$&amp;</span>
+          </div>
+          <div class="t-actions">
+            <button class="btn-primary" id="copy" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4.5A1.5 1.5 0 013 13.5v-9A1.5 1.5 0 014.5 3h9A1.5 1.5 0 0115 4.5V5"/></g></svg>
+              <span>Copia password</span>
+            </button>
+            <button class="btn-ghost" id="regen" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 10-2.3 5.7"/><path d="M20 4v7h-7"/></g></svg>
+              <span>Genera</span>
+            </button>
+            <button class="btn-ghost icon" id="toggle-view" type="button" aria-pressed="false" aria-label="Nascondi password" title="Mostra/nascondi">
+              <svg viewBox="0 0 24 24" aria-hidden="true" id="eye"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></g></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="panels">
+      <section class="card" aria-labelledby="opt-title">
+        <span class="section-kicker">IMPOSTAZIONI</span>
+        <h2 id="opt-title">Personalizza la password</h2>
+
+        <div class="field">
+          <div class="field-head">
+            <label class="field-label" for="len">Lunghezza</label>
+            <span class="field-hint">da 4 a 64 caratteri</span>
+          </div>
+          <div class="len-row">
+            <button class="step" id="minus" type="button" aria-label="Diminuisci lunghezza">−</button>
+            <input type="range" id="len" min="4" max="64" value="16">
+            <button class="step" id="plus" type="button" aria-label="Aumenta lunghezza">+</button>
+            <span class="len-num" id="len-num" aria-hidden="true">16</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <span class="field-label" id="sets-label">Caratteri inclusi</span>
+            <span class="field-hint">almeno uno</span>
+          </div>
+          <div class="chips" role="group" aria-labelledby="sets-label">
+            <button class="chip" type="button" data-set="upper" aria-pressed="true"><span class="tick"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><strong>Maiuscole</strong><code>ABC</code></button>
+            <button class="chip" type="button" data-set="lower" aria-pressed="true"><span class="tick"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><strong>Minuscole</strong><code>abc</code></button>
+            <button class="chip" type="button" data-set="digits" aria-pressed="true"><span class="tick"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><strong>Numeri</strong><code>123</code></button>
+            <button class="chip" type="button" data-set="symbols" aria-pressed="true"><span class="tick"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><strong>Simboli</strong><code>#$&amp;</code></button>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field-label">Opzioni avanzate</span>
+          <label class="switch-row">
+            <span><strong>Evita caratteri ambigui</strong><small>Esclude quelli che si confondono a vista, come <code>I l 1 | O 0 o</code>: utile se devi trascriverla a mano.</small></span>
+            <span class="switch"><input type="checkbox" id="no-ambiguous"><i></i></span>
+          </label>
+          <label class="switch-row">
+            <span><strong>Simboli “facili”</strong><small>Solo <code>! @ # $ % * - _ + = ?</code>: alcuni siti non accettano gli altri.</small></span>
+            <span class="switch"><input type="checkbox" id="safe-symbols"><i></i></span>
+          </label>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="str-title">
+        <span class="section-kicker">ROBUSTEZZA</span>
+        <h2 id="str-title">Quanto è sicura?</h2>
+        <p class="strength-word" id="s-word">—</p>
+        <div class="meter" id="meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+        <ul class="stats">
+          <li><span>Entropia</span><strong id="s-bits">—</strong></li>
+          <li><span>Combinazioni possibili</span><strong id="s-comb">—</strong></li>
+          <li><span>Tempo per indovinarla</span><strong id="s-time">—</strong></li>
+        </ul>
+        <p class="note">Stima per un attacco “a forza bruta” offline con hardware dedicato da 100 miliardi di tentativi al secondo, nel caso medio.</p>
+      </section>
+    </div>
+
+  </main>
+
+  <footer class="site-footer container">
+    <p>© <span id="year">2026</span> Salvatore Luongo</p>
+  </footer>
+
+  <script>
+  (function () {
+    "use strict";
+
+    // ── Insiemi di caratteri ──
+    var SETS = {
+      upper:   "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      lower:   "abcdefghijklmnopqrstuvwxyz",
+      digits:  "0123456789",
+      symbols: "!@#$%^&*()-_=+[]{};:,.<>?/~|"
+    };
+    var SAFE_SYMBOLS = "!@#$%*-_+=?";
+    var AMBIGUOUS = "Il1|O0o";
+
+    var $ = function (id) { return document.getElementById(id); };
+    var state = { len: 16, sets: { upper: true, lower: true, digits: true, symbols: true }, masked: false, pw: "" };
+    try { var saved = JSON.parse(localStorage.getItem("pwgen-opzioni") || "null"); if (saved) { state.len = saved.len || 16; state.sets = saved.sets || state.sets; $("no-ambiguous").checked = !!saved.noAmb; $("safe-symbols").checked = !!saved.safe; } } catch (e) {}
+
+    // Intero casuale in [0, n) senza "modulo bias" (rejection sampling)
+    function randInt(n) {
+      var max = Math.floor(0x100000000 / n) * n, buf = new Uint32Array(1);
+      do { crypto.getRandomValues(buf); } while (buf[0] >= max);
+      return buf[0] % n;
+    }
+    function pick(str) { return str.charAt(randInt(str.length)); }
+
+    function pools() {
+      var noAmb = $("no-ambiguous").checked, out = [];
+      Object.keys(SETS).forEach(function (k) {
+        if (!state.sets[k]) return;
+        var s = (k === "symbols" && $("safe-symbols").checked) ? SAFE_SYMBOLS : SETS[k];
+        if (noAmb) s = s.split("").filter(function (c) { return AMBIGUOUS.indexOf(c) < 0; }).join("");
+        out.push(s);
+      });
+      return out;
+    }
+
+    // Almeno un carattere per ogni tipo scelto, il resto dall'insieme completo, poi rimescola
+    function generate() {
+      var ps = pools(), all = ps.join(""), chars = [];
+      ps.forEach(function (p) { if (chars.length < state.len) chars.push(pick(p)); });
+      while (chars.length < state.len) chars.push(pick(all));
+      for (var i = chars.length - 1; i > 0; i--) { var j = randInt(i + 1), t = chars[i]; chars[i] = chars[j]; chars[j] = t; }
+      return chars.join("");
+    }
+
+    // ── Visualizzazione ──
+    var out = $("pw");
+    function cls(c) {
+      if (/[A-Z]/.test(c)) return "ch-u";
+      if (/[a-z]/.test(c)) return "ch-l";
+      if (/[0-9]/.test(c)) return "ch-d";
+      return "ch-s";
+    }
+    function esc(c) { return c === "<" ? "&lt;" : c === ">" ? "&gt;" : c === "&" ? "&amp;" : c; }
+    function paint(str) {
+      if (state.masked) { out.classList.add("masked"); out.textContent = "•".repeat(str.length); return; }
+      out.classList.remove("masked");
+      out.innerHTML = str.split("").map(function (c) { return '<span class="' + cls(c) + '">' + esc(c) + "</span>"; }).join("");
+    }
+
+    // Piccolo effetto "decodifica" quando nasce una nuova password
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var anim = null;
+    function reveal(str) {
+      if (anim) cancelAnimationFrame(anim);
+      if (reduce || state.masked) { paint(str); return; }
+      var all = pools().join(""), start = performance.now(), dur = 380;
+      (function frame(now) {
+        var k = Math.min(1, (now - start) / dur), fixed = Math.floor(k * str.length), tmp = "";
+        for (var i = 0; i < str.length; i++) tmp += i < fixed ? str[i] : all.charAt(Math.floor(Math.random() * all.length));
+        paint(tmp);
+        if (k < 1) anim = requestAnimationFrame(frame); else { anim = null; paint(str); }
+      })(start);
+    }
+
+    // ── Robustezza ──
+    var LEVELS = [
+      { min: 0,   word: "Debole",     color: "#e53935" },
+      { min: 40,  word: "Discreta",   color: "#fb8c00" },
+      { min: 60,  word: "Buona",      color: "#f2b705" },
+      { min: 80,  word: "Forte",      color: "#43a047" },
+      { min: 110, word: "Fortissima", color: "#2e7d32" }
+    ];
+    function fmtTime(sec) {
+      if (sec < 1) return "meno di un secondo";
+      var u = [["anni", 31557600], ["giorni", 86400], ["ore", 3600], ["minuti", 60], ["secondi", 1]];
+      for (var i = 0; i < u.length; i++) {
+        if (sec >= u[i][1]) {
+          var v = sec / u[i][1];
+          if (i === 0) {
+            if (v >= 1e12) return "oltre mille miliardi di anni";
+            if (v >= 1e9) return Math.round(v / 1e9) + " miliardi di anni";
+            if (v >= 1e6) return Math.round(v / 1e6) + " milioni di anni";
+            if (v >= 1e3) return Math.round(v / 1e3) + " mila anni";
+          }
+          v = Math.round(v);
+          var names = { anni: ["anno", "anni"], giorni: ["giorno", "giorni"], ore: ["ora", "ore"], minuti: ["minuto", "minuti"], secondi: ["secondo", "secondi"] }[u[i][0]];
+          return v + " " + (v === 1 ? names[0] : names[1]);
+        }
+      }
+    }
+    function fmtComb(bits) {
+      var exp = bits * Math.LOG10E * Math.LN2;           // log10(combinazioni)
+      if (exp < 6) return Math.round(Math.pow(10, exp)).toLocaleString("it-IT");
+      var e = Math.floor(exp), m = Math.pow(10, exp - e);
+      return m.toFixed(1).replace(".", ",") + " × 10" + String(e).replace(/\d/g, function (d) { return "⁰¹²³⁴⁵⁶⁷⁸⁹"[d]; });
+    }
+    function strength() {
+      var size = pools().join("").length, bits = state.len * Math.log2(size);
+      var lv = 0; LEVELS.forEach(function (l, i) { if (bits >= l.min) lv = i; });
+      var card = $("s-word").parentNode;
+      card.style.setProperty("--s-color", LEVELS[lv].color);
+      $("s-word").textContent = LEVELS[lv].word;
+      Array.prototype.forEach.call($("meter").children, function (seg, i) { seg.classList.toggle("on", i <= lv); });
+      $("s-bits").textContent = Math.round(bits) + " bit";
+      $("s-comb").textContent = fmtComb(bits);
+      $("s-time").textContent = fmtTime(Math.pow(2, bits - 1) / 1e11);
+    }
+
+    // ── Aggiornamento ──
+    function sync() {
+      var r = $("len");
+      r.value = state.len;
+      r.style.setProperty("--p", ((state.len - 4) / 60 * 100) + "%");
+      $("len-num").textContent = state.len;
+      $("t-flags").textContent = "--lunghezza " + state.len;
+      document.querySelectorAll(".chip").forEach(function (b) { b.setAttribute("aria-pressed", String(!!state.sets[b.dataset.set])); });
+      try { localStorage.setItem("pwgen-opzioni", JSON.stringify({ len: state.len, sets: state.sets, noAmb: $("no-ambiguous").checked, safe: $("safe-symbols").checked })); } catch (e) {}
+    }
+    function refresh() { sync(); state.pw = generate(); reveal(state.pw); strength(); }
+    function setLen(n) { state.len = Math.max(4, Math.min(64, n)); refresh(); }
+
+    $("len").addEventListener("input", function (e) { setLen(+e.target.value); });
+    $("minus").addEventListener("click", function () { setLen(state.len - 1); });
+    $("plus").addEventListener("click", function () { setLen(state.len + 1); });
+    document.querySelectorAll(".chip").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var k = b.dataset.set, on = Object.keys(state.sets).filter(function (x) { return state.sets[x]; });
+        if (state.sets[k] && on.length === 1) { toast("Serve almeno un tipo di carattere"); return; }
+        state.sets[k] = !state.sets[k];
+        refresh();
+      });
+    });
+    $("no-ambiguous").addEventListener("change", refresh);
+    $("safe-symbols").addEventListener("change", refresh);
+
+    var regen = $("regen");
+    regen.addEventListener("click", function () {
+      regen.classList.remove("spin"); void regen.offsetWidth; regen.classList.add("spin");
+      state.pw = generate(); reveal(state.pw);
+    });
+
+    $("toggle-view").addEventListener("click", function () {
+      state.masked = !state.masked;
+      this.setAttribute("aria-pressed", String(state.masked));
+      this.setAttribute("aria-label", state.masked ? "Mostra password" : "Nascondi password");
+      $("eye").innerHTML = state.masked
+        ? '<g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.8 10.8 0 0112 5c6.4 0 10 7 10 7a17 17 0 01-3.2 4.1M6.6 6.6C3.7 8.5 2 12 2 12s3.6 7 10 7a9.7 9.7 0 005.4-1.6"/><path d="M9.9 9.9a3 3 0 004.2 4.2"/></g>'
+        : '<g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></g>';
+      if (anim) { cancelAnimationFrame(anim); anim = null; }
+      paint(state.pw);
+    });
+
+    // ── Copia ──
+    function toast(msg) {
+      var t = document.createElement("div");
+      t.className = "toast"; t.textContent = msg; document.body.appendChild(t);
+      requestAnimationFrame(function () { t.classList.add("show"); });
+      setTimeout(function () { t.classList.remove("show"); setTimeout(function () { t.remove(); }, 300); }, 1600);
+    }
+    var copyBtn = $("copy"), copyTimer;
+    copyBtn.addEventListener("click", function () {
+      var done = function () {
+        copyBtn.classList.add("ok"); copyBtn.querySelector("span").textContent = "Copiata!";
+        toast("Password copiata negli appunti");
+        clearTimeout(copyTimer);
+        copyTimer = setTimeout(function () { copyBtn.classList.remove("ok"); copyBtn.querySelector("span").textContent = "Copia password"; }, 1600);
+      };
+      var fallback = function () {
+        var ta = document.createElement("textarea");
+        ta.value = state.pw; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); done(); } catch (e) { toast("Copia non riuscita: selezionala a mano"); }
+        ta.remove();
+      };
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(state.pw).then(done, fallback);
+      else fallback();
+    });
+
+    // ── Tema chiaro/scuro ──
+    var root = document.documentElement;
+    var prefersDark = function () { return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches; };
+    $("theme-toggle").addEventListener("click", function () {
+      var next = (root.getAttribute("data-theme") || (prefersDark() ? "dark" : "light")) === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem("tema", next); } catch (e) {}
+    });
+
+    $("year").textContent = new Date().getFullYear();
+    refresh();
+  })();
+  </script>
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "27b580cf9b89486eb7659cdb3bfa8a02"}'></script>
+</body>
+</html>
