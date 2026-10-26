@@ -174,8 +174,10 @@
     /* Come funziona */
 
 
-    .site-footer { color:var(--muted); font-size:14px; padding-top:40px; padding-bottom:50px; border-top:1px solid var(--line); margin-top:40px; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; }
-    .site-footer a { color:var(--muted); }
+    .site-footer { color:var(--muted); font-size:14px; padding-top:40px; padding-bottom:50px; border-top:1px solid var(--line); margin-top:40px; }
+    .site-footer p { margin:0; }
+    .site-footer p + p { margin-top:6px; }
+    .site-footer a { color:var(--accent); font-weight:700; text-decoration:none; }
 
     .toast { position:fixed; left:50%; bottom:28px; transform:translate(-50%,18px); background:#1f2633; color:#fff; padding:11px 20px; border-radius:999px; font:600 14px var(--font); opacity:0; transition:opacity .25s, transform .25s; z-index:500; box-shadow:0 8px 24px rgba(0,0,0,.35); pointer-events:none; }
     .toast.show { opacity:1; transform:translate(-50%,0); }
@@ -324,6 +326,7 @@
 
   <footer class="site-footer container">
     <p>© <span id="year">2026</span> Salvatore Luongo</p>
+    <p>Dal mio blog: <a href="https://salvatoreluongo.github.io/blog/">Diario di laboratorio ↗</a></p>
   </footer>
 
   <script>
