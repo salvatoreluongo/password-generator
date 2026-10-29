@@ -50,6 +50,8 @@
     body { margin:0; background:var(--bg); color:var(--body); font-family:var(--font); -webkit-font-smoothing:antialiased; transition:background .3s ease, color .3s ease; }
     a { color: inherit; }
     button { font-family: inherit; }
+    /* Evita lo zoom da doppio-tap su mobile quando si toccano i controlli (il pinch-zoom resta attivo) */
+    button, a, label, input, select, .chip, .switch, .step, .btn-primary, .btn-ghost, [role="button"] { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
     .container { max-width:1240px; margin:0 auto; padding:0 20px; }
     .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
 
